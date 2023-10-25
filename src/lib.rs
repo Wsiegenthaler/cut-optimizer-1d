@@ -523,6 +523,7 @@ type Result<T> = std::result::Result<T, Error>;
 /// A valid solution to an optimization.
 #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "serialize", serde(rename_all = "camelCase"))]
+#[derive(Clone)]
 pub struct Solution {
     /// Fitness score for this solution.
     /// Ranges between 0.0 and 1.0 inclusive, with 1.0 being a perfect solution with no waste.
