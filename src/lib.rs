@@ -738,6 +738,7 @@ impl Optimizer {
         &self,
         stock_pieces: &[StockPiece],
         progress_callback: &F,
+        //TODO patience: u32
     ) -> Result<Solution>
     where
         B: Bin + Clone + Send + Into<ResultStockPiece>,
@@ -745,23 +746,53 @@ impl Optimizer {
     {
         let cut_pieces: Vec<&CutPieceWithId> = self.cut_pieces.iter().collect();
 
-        let units: Vec<OptimizerUnit<B>> = OptimizerUnit::generate_initial_units(
+        let mut units: Vec<OptimizerUnit<B>> = OptimizerUnit::generate_initial_units(
             stock_pieces,
             cut_pieces,
             self.cut_width,
             self.random_seed,
         )?;
 
-        let population_size = units.len();
-        let mut result_units = Population::new(units)
-            .set_size(population_size)
-            .set_rand_seed(self.random_seed)
-            .set_breed_factor(0.5)
-            .set_survival_factor(0.6)
-            .epochs(100, progress_callback)
-            .finish();
+        let patience = 350;//TODO parameterize
 
-        let best_unit = &mut result_units[0];
+        let epochs_per_step = 50;
+        let mut best_fitness = 0.0;
+        let mut last_improvement = 0;
+        let mut total_epochs = 0;
+
+        loop {
+            let population_size = units.len();
+            units = Population::new(units.clone())
+                .set_size(population_size)
+                .set_rand_seed(self.random_seed)
+                .set_breed_factor(0.5)
+                .set_survival_factor(0.6)
+                .epochs(epochs_per_step, progress_callback)
+                .finish();
+        
+            total_epochs += epochs_per_step;
+
+            // Note any improvement
+            let new_best = units[0].fitness();
+            if new_best > best_fitness {
+                best_fitness = new_best;
+                last_improvement = total_epochs;
+            }
+
+            // Stop if we exceed patience
+            if total_epochs - last_improvement > patience { break; }
+        }
+
+        // let population_size = units.len();
+        // let mut result_units = Population::new(units)
+        //     .set_size(population_size)
+        //     .set_rand_seed(self.random_seed)
+        //     .set_breed_factor(0.5)
+        //     .set_survival_factor(0.6)
+        //     .epochs(100, progress_callback)
+        //     .finish();
+
+        let best_unit = &mut units[0];
         if !best_unit.unused_cut_pieces.is_empty() {
             return Err(no_fit_for_cut_piece_error(
                 best_unit.unused_cut_pieces.iter().next().unwrap(),

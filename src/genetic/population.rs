@@ -61,7 +61,6 @@ impl<T: Unit> LazyUnit<T> {
 /// mating fit units and killing unfit units.
 pub struct Population<T: Unit> {
     units: Vec<T>,
-
     seed: u64,
     breed_factor: f64,
     survival_factor: f64,
