@@ -4,6 +4,8 @@ use criterion::*;
 use cut_optimizer_1d::*;
 use rand::prelude::*;
 
+static DEFAULT_PATIENCE: u32 = 150;
+
 fn build_optimizer() -> Optimizer {
     let mut rng: StdRng = SeedableRng::seed_from_u64(1);
 
@@ -48,7 +50,7 @@ pub fn benchmark_optimize(c: &mut Criterion) {
             let _ = build_optimizer()
                 .set_cut_width(1)
                 .set_random_seed(1)
-                .optimize(|_| {});
+                .optimize(|_| {}, DEFAULT_PATIENCE);
         })
     });
 }

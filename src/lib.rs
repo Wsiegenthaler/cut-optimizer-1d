@@ -658,7 +658,7 @@ impl Optimizer {
     }
 
     /// Perform optimization
-    pub fn optimize<F>(&self, progress_callback: F) -> Result<Solution>
+    pub fn optimize<F>(&self, progress_callback: F, patience: u32) -> Result<Solution>
     where
         F: Fn(f64),
     {
@@ -680,7 +680,7 @@ impl Optimizer {
 
         let mut best_result = if self.allow_mixed_stock_sizes {
             // Optimize with all stock sizes
-            self.optimize_with_stock_pieces::<BasicBin, _>(&self.stock_pieces.clone(), &callback)
+            self.optimize_with_stock_pieces::<BasicBin, _>(&self.stock_pieces.clone(), &callback, patience)
         } else {
             // We're not allowing mixed sizes so just give an error result
             // here. Each stock size will be optimized separately below.
@@ -703,7 +703,7 @@ impl Optimizer {
             if let Ok(solution) =
                 self.optimize_with_stock_pieces::<BasicBin, _>(&stock_pieces, &|progress| {
                     progress_callback((completed_runs as f64 + progress) / num_runs as f64);
-                })
+                }, patience)
             {
                 match best_result {
                     Ok(ref best_solution) => {
@@ -738,7 +738,7 @@ impl Optimizer {
         &self,
         stock_pieces: &[StockPiece],
         progress_callback: &F,
-        //TODO patience: u32
+        patience: u32
     ) -> Result<Solution>
     where
         B: Bin + Clone + Send + Into<ResultStockPiece>,
@@ -752,8 +752,6 @@ impl Optimizer {
             self.cut_width,
             self.random_seed,
         )?;
-
-        let patience = 350;//TODO parameterize
 
         let epochs_per_step = 50;
         let mut best_fitness = 0.0;

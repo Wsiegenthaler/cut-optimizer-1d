@@ -1,5 +1,7 @@
 use super::*;
 
+static DEFAULT_PATIENCE: u32 = 150;
+
 static STOCK_PIECES: &[StockPiece] = &[
     StockPiece {
         length: 96,
@@ -79,7 +81,7 @@ fn optimize() {
         .add_cut_pieces(CUT_PIECES.iter().cloned().collect::<Vec<_>>())
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, CUT_PIECES.len());
@@ -100,7 +102,7 @@ fn optimize_non_fitting_cut_piece() {
         })
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {});
+        .optimize(|_| {}, DEFAULT_PATIENCE);
 
     assert!(
         matches!(result, Err(Error::NoFitForCutPiece(_))),
@@ -125,7 +127,7 @@ fn optimize_no_allow_mixed_stock_sizes() {
         .set_cut_width(1)
         .set_random_seed(1)
         .allow_mixed_stock_sizes(false)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, 2);
@@ -160,7 +162,7 @@ fn optimize_different_stock_piece_prices() {
         .set_cut_width(1)
         .set_random_seed(1)
         .allow_mixed_stock_sizes(false)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, 2);
@@ -194,7 +196,7 @@ fn optimize_same_stock_piece_prices() {
         .set_cut_width(1)
         .set_random_seed(1)
         .allow_mixed_stock_sizes(false)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, 2);
@@ -218,7 +220,7 @@ fn optimize_stock_quantity_too_low() {
         })
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {});
+        .optimize(|_| {}, DEFAULT_PATIENCE);
 
     assert!(
         result.is_err(),
@@ -241,7 +243,7 @@ fn optimize_stock_quantity() {
         })
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, 2);
@@ -272,7 +274,7 @@ fn optimize_stock_quantity_multiple() {
         })
         .set_cut_width(0)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, 3);
@@ -323,7 +325,7 @@ fn optimize_one_stock_piece_several_cut_pieces() {
         })
         .set_cut_width(0)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, 7);
@@ -349,7 +351,7 @@ fn optimize_stock_duplicate_cut_piece() {
         })
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, 2);
@@ -375,7 +377,7 @@ fn optimize_32_cut_pieces_on_1_stock_piece() {
     let solution = optimizer
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, num_cut_pieces);
@@ -406,7 +408,7 @@ fn optimize_32_cut_pieces_on_2_stock_pieces_zero_cut_width() {
     let solution = optimizer
         .set_cut_width(0)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, num_cut_pieces);
@@ -437,7 +439,7 @@ fn optimize_32_cut_pieces_on_2_stock_piece() {
     let solution = optimizer
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, num_cut_pieces);
@@ -466,7 +468,7 @@ fn optimize_64_cut_pieces_on_2_stock_pieces() {
     let solution = optimizer
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, num_cut_pieces);
@@ -504,7 +506,7 @@ fn optimize_random_cut_pieces() {
     let solution = optimizer
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     sanity_check_solution(&solution, num_cut_pieces);
@@ -534,7 +536,7 @@ fn optimize_stock_quantity_1() {
     let solution = optimizer
         .set_cut_width(1)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     assert_eq!(solution.stock_pieces.len(), 1);
@@ -559,7 +561,7 @@ fn optimize_stock_quantity_2() {
     let solution = optimizer
         .set_cut_width(2)
         .set_random_seed(1)
-        .optimize(|_| {})
+        .optimize(|_| {}, DEFAULT_PATIENCE)
         .unwrap();
 
     assert_eq!(solution.stock_pieces.len(), 2);
@@ -590,7 +592,7 @@ fn deterministic_solutions() {
             optimizer.set_cut_width(2);
             optimizer.set_random_seed(1);
 
-            optimizer.optimize(|_| {}).unwrap()
+            optimizer .optimize(|_| {}, DEFAULT_PATIENCE).unwrap()
         })
         .collect();
 
